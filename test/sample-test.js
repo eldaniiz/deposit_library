@@ -1,21 +1,35 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
-describe("deposit_lib", function () {
-  it("deposit library explained :D", async function () {
-    const lib_factory = await ethers.getContractFactory("Deposit", {libraries: {
+const hre = require("hardhat");
+const { getContractAddress } = require('@ethersproject/address')
 
-      deposit: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-    }});
 
-    const deposit = await lib_factory.deploy(8, 900);
+async function main() {
+
+
+  const [owner] = await ethers.getSigners()
+  const transactionCount = await owner.getTransactionCount()
+
+  const lib_adress = getContractAddress({
+    from: owner.address,
+    nonce: transactionCount
+  })
+
+  const Deposit = await hre.ethers.getContractFactory("Deposit", {libraries: {
+
+    deposit: lib_adress
+  }});
+
+  const deposit = await Deposit.deploy(8, 900);
+
+  await deposit.deployed();
+
+  console.log("Deposit contract deployed to:", deposit.address);
+
+}
+
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
   });
-
-  it("deposit library explained :D", async function () {
-    const lib_factory2 = await ethers.getContractFactory("Deposit2", {libraries: {
-
-      deposit: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199"
-    }});
-
-    const deposit2 = await lib_factory2.deploy(8, 900);
-  });
-});
